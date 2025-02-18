@@ -1,18 +1,20 @@
 package ru.nikita.labs.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.nikita.labs.dto.ClientInfoDto;
-import ru.nikita.labs.dto.DatabaseInfoDto;
-import ru.nikita.labs.dto.ServerInfoDto;
+import ru.nikita.labs.dto.info.ClientInfoDto;
+import ru.nikita.labs.dto.info.DatabaseInfoDto;
+import ru.nikita.labs.dto.info.ServerInfoDto;
 import ru.nikita.labs.service.InfoService;
 
 @RestController
 @RequestMapping("/info")
 public class InfoController {
 
+    @Autowired
     private final InfoService infoService;
 
     public InfoController(InfoService infoService) {

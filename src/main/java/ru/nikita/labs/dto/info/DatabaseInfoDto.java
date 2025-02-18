@@ -1,7 +1,7 @@
-package ru.nikita.labs.dto;
+package ru.nikita.labs.dto.info;
 
 public record DatabaseInfoDto(String productName,
                               String productVersion,
                               String driverName,
-                              String driverVersion) implements Dto {
+                              String driverVersion) {
 }

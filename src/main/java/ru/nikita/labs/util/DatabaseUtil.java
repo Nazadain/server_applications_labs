@@ -1,7 +1,7 @@
 package ru.nikita.labs.util;
 
 import lombok.experimental.UtilityClass;
-import ru.nikita.labs.dto.DatabaseInfoDto;
+import ru.nikita.labs.dto.info.DatabaseInfoDto;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -13,8 +13,7 @@ public class DatabaseUtil {
     public static DatabaseInfoDto getDatabaseData(String url,
                                                   String username,
                                                   String password) {
-        try (Connection connection = DriverManager.getConnection(
-                url,
+        try (Connection connection = DriverManager.getConnection(url,
                 username,
                 password)) {
             DatabaseMetaData metaData = connection.getMetaData();

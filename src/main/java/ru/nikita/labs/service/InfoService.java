@@ -4,9 +4,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
-import ru.nikita.labs.dto.ClientInfoDto;
-import ru.nikita.labs.dto.DatabaseInfoDto;
-import ru.nikita.labs.dto.ServerInfoDto;
+import ru.nikita.labs.dto.info.ClientInfoDto;
+import ru.nikita.labs.dto.info.DatabaseInfoDto;
+import ru.nikita.labs.dto.info.ServerInfoDto;
 import ru.nikita.labs.util.DatabaseUtil;
 
 import java.util.Locale;

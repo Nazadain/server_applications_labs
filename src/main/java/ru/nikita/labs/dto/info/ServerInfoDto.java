@@ -1,6 +1,6 @@
-package ru.nikita.labs.dto;
+package ru.nikita.labs.dto.info;
 
 public record ServerInfoDto(String javaVersion,
                             String timeZone,
-                            String locale) implements Dto {
+                            String locale) {
 }
