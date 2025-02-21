@@ -1,5 +1,5 @@
 package ru.nikita.labs.validation;
 
-public interface Validation<T> {
+public interface Validator<T> {
     void validate(T body) throws RuntimeException;
 }

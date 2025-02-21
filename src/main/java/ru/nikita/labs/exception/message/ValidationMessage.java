@@ -1,17 +1,11 @@
-package ru.nikita.labs.exception;
+package ru.nikita.labs.exception.message;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum AuthMessage {
-    NOT_AUTHORIZED("Пользователь не авторизован!"),
-
-    USER_ALREADY_EXISTS(
-            "Пользователь с таким именем уже существует!"),
-
-    EMAIL_ALREADY_EXISTS("Этот email уже используется!"),
+public enum ValidationMessage {
 
     USERNAME_CANNOT_BE_NULL("Имя пользователя не может быть пустым!"),
 

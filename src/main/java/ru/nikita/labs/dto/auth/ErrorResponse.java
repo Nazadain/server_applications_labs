@@ -1,12 +1,12 @@
 package ru.nikita.labs.dto.auth;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import ru.nikita.labs.exception.AuthMessage;
 
 @Getter
 @NoArgsConstructor
-public class ErrorResponse implements Response {
+public class ErrorResponse {
     private String message;
 
     public ErrorResponse(String message) {

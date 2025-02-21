@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RegisterRequest implements UserRequest {
+public class RegisterRequest {
 
     @JsonProperty("username")
     private String username;

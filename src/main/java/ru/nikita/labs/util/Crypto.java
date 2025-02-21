@@ -47,9 +47,8 @@ public class Crypto {
     }
 
     private static byte[] getByteHash(String str) {
-        MessageDigest digest = null;
         try {
-            digest = MessageDigest.getInstance(SHA_256);
+            MessageDigest digest = MessageDigest.getInstance(SHA_256);
             return digest.digest(str.getBytes(
                     StandardCharsets.UTF_8));
         } catch (NoSuchAlgorithmException e) {

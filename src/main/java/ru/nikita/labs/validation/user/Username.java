@@ -1,7 +1,6 @@
 package ru.nikita.labs.validation.user;
 
 import lombok.experimental.UtilityClass;
-import ru.nikita.labs.validation.Validation;
 
 @UtilityClass
 public class Username {

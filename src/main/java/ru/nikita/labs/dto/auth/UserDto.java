@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserResponse implements Response {
+public class UserDto {
     private String username;
     private String email;
     private LocalDate birthday;

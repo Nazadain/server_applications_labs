@@ -1,38 +1,36 @@
 package ru.nikita.labs.service;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import ru.nikita.labs.dto.auth.JwtResponse;
 import ru.nikita.labs.dto.auth.LoginRequest;
 import ru.nikita.labs.dto.auth.RegisterRequest;
-import ru.nikita.labs.dto.auth.UserResponse;
+import ru.nikita.labs.dto.auth.UserDto;
 import ru.nikita.labs.exception.AuthException;
-import ru.nikita.labs.exception.AuthMessage;
+import ru.nikita.labs.exception.message.AuthMessage;
 import ru.nikita.labs.model.User;
 import ru.nikita.labs.repository.UserRepository;
-
-import static ru.nikita.labs.util.Crypto.getSalt;
-import static ru.nikita.labs.util.Crypto.sha256Hex;
+import ru.nikita.labs.util.Crypto;
 
 @Service
 public class AuthService {
-
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private JwtService jwtService;
 
-    public UserResponse register(RegisterRequest userReq) throws AuthException {
+    public UserDto register(RegisterRequest userReq,
+                            HttpServletRequest req) throws AuthException {
         checkUsername(userReq.getUsername());
         checkEmail(userReq.getEmail());
-
-        String encodedPassword = sha256Hex(
-                userReq.getPassword(),
-                getSalt());
-        userReq.setPassword(encodedPassword);
 
         User newUser = buildUser(userReq);
         userRepository.save(newUser);
 
-        return UserResponse.builder()
+        return UserDto.builder()
                 .username(newUser.getUsername())
                 .email(newUser.getEmail())
                 .birthday(newUser.getBirthday())
@@ -40,8 +38,43 @@ public class AuthService {
                 .build();
     }
 
-    public UserResponse login(LoginRequest userReq) throws AuthException {
-        return new UserResponse();
+    public JwtResponse login(LoginRequest userReq,
+                             HttpServletResponse resp) throws AuthException {
+        User user = userRepository.findByUsername(
+                userReq.getUsername());
+        if (user == null) {
+            throw new AuthException(
+                    AuthMessage.WRONG_USERNAME_OR_PASSWORD,
+                    HttpStatus.BAD_REQUEST);
+        }
+        String encodedPassword = Crypto.sha256Hex(
+                userReq.getPassword(),
+                user.getSalt());
+        if (!user.getPassword().equals(encodedPassword)) {
+            throw new AuthException(
+                    AuthMessage.WRONG_USERNAME_OR_PASSWORD,
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        String token = jwtService.generateToken(user);
+        resp.setHeader("Authorization", "Bearer " + token);
+        return new JwtResponse(token);
+    }
+
+    public UserDto me(HttpServletRequest req) throws AuthException {
+        return new UserDto();
+    }
+
+    public void out(HttpServletRequest req,
+                    HttpServletResponse resp) throws AuthException {
+        String token = req.getHeader("Authorization");
+        if (token == null) {
+            throw new AuthException(
+                    AuthMessage.NOT_AUTHORIZED,
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+        resp.setHeader("Authorization", "");
     }
 
     private User buildUser(RegisterRequest userReq) {
