@@ -1,5 +1,6 @@
 package ru.nikita.labs.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,8 @@ import ru.nikita.labs.repository.UserRepository;
 import ru.nikita.labs.util.Crypto;
 
 import static ru.nikita.labs.exception.message.AuthMessage.USER_ALREADY_EXISTS;
+import static ru.nikita.labs.service.JwtService.ACCESS;
+import static ru.nikita.labs.service.JwtService.REFRESH;
 
 @Service
 public class AuthService {
@@ -58,22 +61,29 @@ public class AuthService {
         UserDto userDto = buildUserDto(user);
         String refreshToken = jwtService.generateRefreshToken(userDto);
         String accessToken = jwtService.generateAccessToken(userDto);
-        CookieRequest cookieReq = new CookieRequest(
-                "REFRESH", refreshToken);
+        CookieRequest refreshCookie = new CookieRequest(
+                REFRESH, refreshToken, 2592000);
+        CookieRequest accessCookie = new CookieRequest(
+                ACCESS, accessToken, 3600);
 
-        cookieService.setCookie(cookieReq, resp);
-        resp.setHeader("Authorization", "Bearer " + accessToken);
+        cookieService.setCookie(refreshCookie, resp);
+        cookieService.setCookie(accessCookie, resp);
         return new JwtResponse(accessToken);
     }
 
-    public UserDto me(HttpServletResponse resp) {
-        String token = resp.getHeader("Authorization")
-                .substring(7);
-        return jwtService.extractUserResponse(token);
+    public UserDto me(HttpServletRequest req) throws AuthException {
+        String token = cookieService.getCookie(ACCESS, req)
+                .orElseThrow(() ->
+                        new AuthException(
+                                AuthMessage.NOT_AUTHORIZED,
+                                HttpStatus.UNAUTHORIZED))
+                .getValue();
+        return jwtService.extractUserDto(token);
     }
 
     public void logout(HttpServletResponse resp) {
-        cookieService.deleteCookie("REFRESH", resp);
+        cookieService.deleteCookie(REFRESH, resp);
+        cookieService.deleteCookie(ACCESS, resp);
     }
 
     private UserDto buildUserDto(User user) {

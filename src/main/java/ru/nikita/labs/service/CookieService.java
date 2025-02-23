@@ -10,6 +10,7 @@ import ru.nikita.labs.exception.AuthException;
 import ru.nikita.labs.exception.message.AuthMessage;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 @Service
 public class CookieService {
@@ -20,27 +21,19 @@ public class CookieService {
         String value = cookieRequest.getValue();
         Cookie cookie = new Cookie(key, value);
 
-        cookie.setMaxAge(2592000);
+        cookie.setMaxAge(cookieRequest.getAge());
         cookie.setPath("/");
 
         resp.addCookie(cookie);
     }
 
-    public Cookie getCookie(String name, HttpServletRequest req) {
-        Cookie[] cookies = req.getCookies();
-        if (cookies == null) {
-            throw new NullPointerException("Cookies is null");
+    public Optional<Cookie> getCookie(String name, HttpServletRequest req) {
+        if (req.getCookies() != null) {
+            return Arrays.stream(req.getCookies())
+                    .filter(cookie -> cookie.getName().equals(name))
+                    .findFirst();
         }
-        Cookie cookie = Arrays.stream(cookies)
-                .filter(c -> c.getName().equals(name))
-                .findFirst()
-                .orElseThrow(() -> new AuthException(
-                        AuthMessage.NOT_AUTHORIZED,
-                        HttpStatus.UNAUTHORIZED));
-        if (cookie.getValue() == null || cookie.getValue().isEmpty()) {
-            throw new NullPointerException("Cookie value is null");
-        }
-        return cookie;
+        return Optional.empty();
     }
 
     public void deleteCookie(String cookieName,

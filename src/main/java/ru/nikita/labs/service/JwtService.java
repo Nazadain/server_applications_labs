@@ -18,6 +18,8 @@ import java.util.function.Function;
 @Getter
 @Service
 public class JwtService {
+    public static final String ACCESS = "ACCESS_TOKEN";
+    public static final String REFRESH = "REFRESH_TOKEN";
     @Value("${jwt.secret}")
     private String secretKey;
 
@@ -31,7 +33,7 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public UserDto extractUserResponse(String token) {
+    public UserDto extractUserDto(String token) {
         Claims claims = extractAllClaims(token);
         return UserDto.builder()
                 .username(claims.getSubject())

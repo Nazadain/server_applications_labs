@@ -7,10 +7,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import ru.nikita.labs.dto.UserDto;
+import ru.nikita.labs.dto.request.CookieRequest;
 import ru.nikita.labs.exception.AuthException;
 import ru.nikita.labs.exception.message.AuthMessage;
 import ru.nikita.labs.service.CookieService;
 import ru.nikita.labs.service.JwtService;
+
+import static ru.nikita.labs.service.JwtService.ACCESS;
+import static ru.nikita.labs.service.JwtService.REFRESH;
 
 @Component
 public class JwtInterceptor implements HandlerInterceptor {
@@ -26,53 +30,61 @@ public class JwtInterceptor implements HandlerInterceptor {
             HttpServletResponse resp,
             Object handler) throws AuthException {
         String uri = req.getRequestURI();
-        String refreshToken = getRefreshToken(req);
-        if (uri.endsWith(REGISTER_ENDPOINT)) {
-            return handleRegister(refreshToken);
-        }
-        String authHeader = resp.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            authHeader = refreshAccessToken(refreshToken, resp);
-        }
-        String accessToken = authHeader.substring(7);
-        String username = jwtService.extractUsername(refreshToken);
-        if (!jwtService.isTokenValid(accessToken, username)) {
-            refreshAccessToken(refreshToken, resp);
-        }
-        return true;
-    }
-
-    private String getRefreshToken(HttpServletRequest req) {
+        String refreshToken;
+        String accessCookie;
         try {
-            return cookieService
-                    .getCookie("REFRESH", req)
-                    .getValue();
-        } catch (Exception e) {
-            String uri = req.getRequestURI();
-            if (uri.endsWith(REGISTER_ENDPOINT)) {
-                return null;
+            accessCookie = getCookieValueByName(req, ACCESS);
+            refreshToken = getCookieValueByName(req, REFRESH);
+        } catch (AuthException e) {
+            if (isAuthorizedProhibitedRoute(uri)) {
+                return true;
+            } else {
+                throw e;
             }
-            throw new AuthException(
-                    AuthMessage.NOT_AUTHORIZED,
-                    HttpStatus.UNAUTHORIZED);
         }
-    }
-
-    private boolean handleRegister(String token) {
-        if (token != null) {
+        if (isAuthorizedProhibitedRoute(uri)) {
             throw new AuthException(
                     AuthMessage.CANNOT_BE_AUTHORIZED,
-                    HttpStatus.FORBIDDEN
-            );
+                    HttpStatus.FORBIDDEN);
+        }
+        String username = jwtService.extractUsername(refreshToken);
+
+        boolean isAccessHeaderValid = true;
+        String accessHeader = resp.getHeader("Authorization");
+
+        if (accessHeader != null && accessHeader.startsWith("Bearer ")) {
+            accessHeader = accessHeader.substring(7);
+            if (!jwtService.isTokenValid(accessHeader, username)) {
+                isAccessHeaderValid = false;
+            }
+        }
+        if (!isAccessHeaderValid) {
+            UserDto user = jwtService.extractUserDto(refreshToken);
+            String newAccessToken = jwtService
+                    .generateAccessToken(user);
+
+            resp.setHeader("Authorization", "Bearer " + newAccessToken);
+            cookieService.setCookie(
+                    new CookieRequest(
+                            ACCESS,
+                            newAccessToken,
+                            3600),
+                    resp);
         }
         return true;
     }
 
-    private String refreshAccessToken(String refreshToken,
-                                      HttpServletResponse resp) {
-        UserDto user = jwtService.extractUserResponse(refreshToken);
-        String accessToken = jwtService.generateAccessToken(user);
-        resp.addHeader("Authorization", "Bearer " + accessToken);
-        return "Bearer " + accessToken;
+    private boolean isAuthorizedProhibitedRoute(String uri) {
+        return uri.endsWith("/register");
+    }
+
+    private String getCookieValueByName(
+            HttpServletRequest req, String name) {
+        return cookieService.getCookie(name, req)
+                .orElseThrow(() ->
+                        new AuthException(
+                                AuthMessage.NOT_AUTHORIZED,
+                                HttpStatus.UNAUTHORIZED))
+                .getValue();
     }
 }

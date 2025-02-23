@@ -7,10 +7,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.nikita.labs.dto.UserDto;
 import ru.nikita.labs.dto.request.LoginRequest;
 import ru.nikita.labs.dto.request.RegisterRequest;
 import ru.nikita.labs.dto.response.JwtResponse;
-import ru.nikita.labs.dto.UserDto;
+import ru.nikita.labs.exception.AuthException;
 import ru.nikita.labs.service.AuthService;
 
 @RestController
@@ -38,8 +39,9 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserDto> me(HttpServletResponse resp) {
-        UserDto user = authService.me(resp);
+    public ResponseEntity<UserDto> me(HttpServletRequest req)
+            throws AuthException {
+        UserDto user = authService.me(req);
         return ResponseEntity.ok()
                 .body(user);
     }
