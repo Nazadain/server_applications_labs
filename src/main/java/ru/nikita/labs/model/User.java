@@ -33,25 +33,20 @@ public class User {
     @Column(name = "birthday", nullable = false)
     private LocalDate birthday;
 
-    @Column(name = "role", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Role role;
-
     @Column(name = "salt", nullable = false, unique = true)
     private String salt;
 
-    @ToString.Exclude
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Token> tokens = new ArrayList<>();
-
-    public User(Long id, String username, String password, String email, LocalDate birthday, Role role) {
+    public User(Long id,
+                String username,
+                String password,
+                String email,
+                LocalDate birthday) {
         this.id = id;
         this.username = username;
         this.salt = Crypto.getSalt();
         this.password = Crypto.sha256Hex(password, this.salt);
         this.email = email;
         this.birthday = birthday;
-        this.role = role;
     }
 
     public static UserBuilder builder() {
@@ -64,7 +59,6 @@ public class User {
         private String password;
         private String email;
         private LocalDate birthday;
-        private Role role;
 
         UserBuilder() {
         }
@@ -94,17 +88,12 @@ public class User {
             return this;
         }
 
-        public UserBuilder role(Role role) {
-            this.role = role;
-            return this;
-        }
-
         public User build() {
-            return new User(this.id, this.username, this.password, this.email, this.birthday, this.role);
+            return new User(this.id, this.username, this.password, this.email, this.birthday);
         }
 
         public String toString() {
-            return "User.UserBuilder(id=" + this.id + ", username=" + this.username + ", password=" + this.password + ", email=" + this.email + ", birthday=" + this.birthday + ", role=" + this.role + ")";
+            return "User.UserBuilder(id=" + this.id + ", username=" + this.username + ", password=" + this.password + ", email=" + this.email + ", birthday=" + this.birthday + ")";
         }
     }
 }

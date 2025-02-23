@@ -1,12 +1,10 @@
-package ru.nikita.labs.dto.auth;
+package ru.nikita.labs.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
 public class JwtResponse {
-    private String token;
+    private String accessToken;
 }

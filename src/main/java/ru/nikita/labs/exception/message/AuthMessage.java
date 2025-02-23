@@ -17,7 +17,9 @@ public enum AuthMessage {
     USER_ALREADY_EXISTS(
             "Пользователь с таким именем уже существует!"),
 
-    EMAIL_ALREADY_EXISTS("Этот email уже используется!");
+    EMAIL_ALREADY_EXISTS("Этот email уже используется!"),
+
+    WRONG_PASSWORD("Вы ввели неправильный пароль!");
 
     private final String message;
 }
