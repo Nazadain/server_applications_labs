@@ -6,10 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import ru.nikita.labs.dto.UserDto;
-import ru.nikita.labs.dto.request.CookieRequest;
 import ru.nikita.labs.exception.AuthException;
 import ru.nikita.labs.exception.message.AuthMessage;
+import ru.nikita.labs.service.AuthService;
 import ru.nikita.labs.service.CookieService;
 import ru.nikita.labs.service.JwtService;
 
@@ -22,6 +21,8 @@ public class JwtInterceptor implements HandlerInterceptor {
     private JwtService jwtService;
     @Autowired
     private CookieService cookieService;
+    @Autowired
+    private AuthService authService;
     private final String REGISTER_ENDPOINT = "/register";
 
     @Override
@@ -31,9 +32,8 @@ public class JwtInterceptor implements HandlerInterceptor {
             Object handler) throws AuthException {
         String uri = req.getRequestURI();
         String refreshToken;
-        String accessCookie;
         try {
-            accessCookie = getCookieValueByName(req, ACCESS);
+            getCookieValueByName(req, ACCESS);
             refreshToken = getCookieValueByName(req, REFRESH);
         } catch (AuthException e) {
             if (isAuthorizedProhibitedRoute(uri)) {
@@ -59,23 +59,13 @@ public class JwtInterceptor implements HandlerInterceptor {
             }
         }
         if (!isAccessHeaderValid) {
-            UserDto user = jwtService.extractUserDto(refreshToken);
-            String newAccessToken = jwtService
-                    .generateAccessToken(user);
-
-            resp.setHeader("Authorization", "Bearer " + newAccessToken);
-            cookieService.setCookie(
-                    new CookieRequest(
-                            ACCESS,
-                            newAccessToken,
-                            3600),
-                    resp);
+            authService.refresh(req, resp);
         }
         return true;
     }
 
     private boolean isAuthorizedProhibitedRoute(String uri) {
-        return uri.endsWith("/register");
+        return uri.endsWith(REGISTER_ENDPOINT);
     }
 
     private String getCookieValueByName(

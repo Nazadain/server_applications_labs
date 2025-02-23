@@ -50,4 +50,13 @@ public class AuthController {
     public void logout(HttpServletResponse resp) {
         authService.logout(resp);
     }
+
+    @GetMapping("/refresh")
+    public ResponseEntity<JwtResponse> refresh(
+            HttpServletRequest req,
+            HttpServletResponse resp) {
+        String newAccessToken = authService.refresh(req, resp);
+        return ResponseEntity.ok()
+                .body(new JwtResponse(newAccessToken));
+    }
 }

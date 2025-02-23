@@ -3,10 +3,12 @@ package ru.nikita.labs;
 import jakarta.annotation.PostConstruct;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.ServletComponentScan;
 
 import java.util.Locale;
 import java.util.TimeZone;
 
+@ServletComponentScan
 @SpringBootApplication
 public class LabsApplication {
 

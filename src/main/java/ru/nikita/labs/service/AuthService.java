@@ -86,6 +86,28 @@ public class AuthService {
         cookieService.deleteCookie(ACCESS, resp);
     }
 
+    public String refresh(
+            HttpServletRequest req,
+            HttpServletResponse resp) throws AuthException {
+        String refreshToken = cookieService.getCookie(REFRESH, req)
+                .orElseThrow(() ->
+                        new AuthException(
+                                AuthMessage.NOT_AUTHORIZED,
+                                HttpStatus.UNAUTHORIZED))
+                .getValue();
+        UserDto user = jwtService.extractUserDto(refreshToken);
+        String newAccessToken = jwtService
+                .generateAccessToken(user);
+        resp.setHeader("Authorization", "Bearer " + newAccessToken);
+        cookieService.setCookie(
+                new CookieRequest(
+                        ACCESS,
+                        newAccessToken,
+                        3600),
+                resp);
+        return newAccessToken;
+    }
+
     private UserDto buildUserDto(User user) {
         return UserDto.builder()
                 .username(user.getUsername())

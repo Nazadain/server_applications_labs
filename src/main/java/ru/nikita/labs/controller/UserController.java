@@ -15,11 +15,11 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PatchMapping("/{id}/updatePassword")
+    @PutMapping("/{id}/updatePassword")
     public ResponseEntity<UserDto> updatePassword(
             @RequestBody @Validated
             UpdatePasswordRequest updatePasswordRequest,
-            @PathVariable Long id) {
+            @PathVariable("id") Long id) {
         UserDto user = userService.updatePassword(
                 updatePasswordRequest, id);
         return ResponseEntity.ok().body(user);
