@@ -54,7 +54,7 @@ public class AuthController {
     @GetMapping("/refresh")
     public ResponseEntity<JwtResponse> refresh(
             HttpServletRequest req,
-            HttpServletResponse resp) {
+            HttpServletResponse resp) throws AuthException {
         String newAccessToken = authService.refresh(req, resp);
         return ResponseEntity.ok()
                 .body(new JwtResponse(newAccessToken));

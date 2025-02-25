@@ -12,8 +12,8 @@ import ru.nikita.labs.service.AuthService;
 import ru.nikita.labs.service.CookieService;
 import ru.nikita.labs.service.JwtService;
 
-import static ru.nikita.labs.service.JwtService.ACCESS;
-import static ru.nikita.labs.service.JwtService.REFRESH;
+import static ru.nikita.labs.config.JwtConfig.ACCESS;
+import static ru.nikita.labs.config.JwtConfig.REFRESH;
 
 @Component
 public class JwtInterceptor implements HandlerInterceptor {
@@ -23,6 +23,7 @@ public class JwtInterceptor implements HandlerInterceptor {
     private CookieService cookieService;
     @Autowired
     private AuthService authService;
+
     private final String REGISTER_ENDPOINT = "/register";
 
     @Override
@@ -71,10 +72,9 @@ public class JwtInterceptor implements HandlerInterceptor {
     private String getCookieValueByName(
             HttpServletRequest req, String name) {
         return cookieService.getCookie(name, req)
-                .orElseThrow(() ->
-                        new AuthException(
-                                AuthMessage.NOT_AUTHORIZED,
-                                HttpStatus.UNAUTHORIZED))
+                .orElseThrow(() -> new AuthException(
+                        AuthMessage.NOT_AUTHORIZED,
+                        HttpStatus.UNAUTHORIZED))
                 .getValue();
     }
 }

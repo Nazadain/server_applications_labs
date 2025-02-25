@@ -6,8 +6,9 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.nikita.labs.config.JwtConfig;
 import ru.nikita.labs.dto.UserDto;
 
 import java.security.Key;
@@ -18,16 +19,8 @@ import java.util.function.Function;
 @Getter
 @Service
 public class JwtService {
-    public static final String ACCESS = "ACCESS_TOKEN";
-    public static final String REFRESH = "REFRESH_TOKEN";
-    @Value("${jwt.secret}")
-    private String secretKey;
-
-    @Value("${jwt.access.expiration}")
-    private long accessExpiration;
-
-    @Value("${jwt.refresh.expiration}")
-    private long refreshExpiration;
+    @Autowired
+    private JwtConfig jwtConfig;
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -58,11 +51,11 @@ public class JwtService {
     }
 
     public String generateAccessToken(UserDto user) {
-        return buildToken(user, accessExpiration);
+        return buildToken(user, jwtConfig.getAccessExpiration());
     }
 
     public String generateRefreshToken(UserDto user) {
-        return buildToken(user, refreshExpiration);
+        return buildToken(user, jwtConfig.getRefreshExpiration());
     }
 
     private String buildToken(UserDto user, long expiration) {
@@ -91,7 +84,7 @@ public class JwtService {
     }
 
     private Key getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        byte[] keyBytes = Decoders.BASE64.decode(jwtConfig.getSecretKey());
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }
