@@ -33,6 +33,7 @@ public class UserService {
         return userMapper.getUserDtoFromUser(newUser);
     }
 
+    @Transactional
     public UserDto updatePassword(
             @Valid UpdatePasswordRequest updatePasswordReq,
             Long id) {

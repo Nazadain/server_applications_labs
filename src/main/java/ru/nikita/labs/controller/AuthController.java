@@ -13,11 +13,11 @@ import ru.nikita.labs.dto.request.RegisterRequest;
 import ru.nikita.labs.dto.response.JwtResponse;
 import ru.nikita.labs.exception.AuthException;
 import ru.nikita.labs.service.AuthService;
+import ru.nikita.labs.service.JwtService;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-    @Autowired
     private AuthService authService;
 
     @PostMapping("/register")
@@ -51,12 +51,8 @@ public class AuthController {
         authService.logout(resp);
     }
 
-    @GetMapping("/refresh")
-    public ResponseEntity<JwtResponse> refresh(
-            HttpServletRequest req,
-            HttpServletResponse resp) throws AuthException {
-        String newAccessToken = authService.refresh(req, resp);
-        return ResponseEntity.ok()
-                .body(new JwtResponse(newAccessToken));
+    @Autowired
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 }

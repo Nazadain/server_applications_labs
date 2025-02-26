@@ -21,7 +21,7 @@ import ru.nikita.labs.util.Crypto;
 
 import static ru.nikita.labs.config.JwtConfig.ACCESS;
 import static ru.nikita.labs.config.JwtConfig.REFRESH;
-import static ru.nikita.labs.exception.factory.AuthExceptionFactory.badCredentials;
+import static ru.nikita.labs.exception.factory.AuthExceptionFactory.wrongUsernameOrPassword;
 
 @Service
 public class AuthService {
@@ -39,9 +39,9 @@ public class AuthService {
 
     @Transactional
     public JwtResponse login(
-            @Valid LoginRequest userReq,
+            @Valid LoginRequest loginReq,
             HttpServletResponse resp) throws AuthException {
-        User user = authenticateUser(userReq);
+        User user = authenticateUser(loginReq);
         UserDto userDto = userMapper.getUserDtoFromUser(user);
         String refreshToken = jwtService.generateRefreshToken(userDto);
         String accessToken = jwtService.generateAccessToken(userDto);
@@ -61,32 +61,14 @@ public class AuthService {
         cookieService.deleteCookie(ACCESS, resp);
     }
 
-    public String refresh(
-            HttpServletRequest req,
-            HttpServletResponse resp) throws AuthException {
-        String refreshToken = cookieService.getCookie(REFRESH, req)
-                .orElseThrow(AuthExceptionFactory::unauthorized)
-                .getValue();
-        UserDto user = jwtService.extractUserDto(refreshToken);
-        String newAccessToken = jwtService
-                .generateAccessToken(user);
-        resp.setHeader("Authorization", "Bearer " + newAccessToken);
-        cookieService.setCookie(new CookieRequest(
-                        ACCESS,
-                        newAccessToken,
-                        jwtConfig.getCookieAccessExpiration()),
-                resp);
-        return newAccessToken;
-    }
-
-    private User authenticateUser(LoginRequest userReq) {
+    private User authenticateUser(LoginRequest loginReq) {
         User user = userRepository
-                .findByUsername(userReq.getUsername())
-                .orElseThrow(AuthExceptionFactory::badCredentials);
+                .findByUsername(loginReq.getUsername())
+                .orElseThrow(AuthExceptionFactory::wrongUsernameOrPassword);
         String encryptedPassword = Crypto.sha256Hex(
-                userReq.getPassword(), user.getSalt());
+                loginReq.getPassword(), user.getSalt());
         if (!user.getPassword().equals(encryptedPassword)) {
-            throw badCredentials();
+            throw wrongUsernameOrPassword();
         }
         return user;
     }

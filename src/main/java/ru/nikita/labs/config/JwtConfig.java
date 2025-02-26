@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Configuration;
 public class JwtConfig {
     public static final String ACCESS = "ACCESS_TOKEN";
     public static final String REFRESH = "REFRESH_TOKEN";
+    public final String BEARER_PREFIX = "Bearer ";
+    public final String AUTHORIZATION_HEADER = "Authorization";
 
     @Value("${jwt.secret}")
     private String secretKey;
@@ -24,4 +26,5 @@ public class JwtConfig {
 
     @Value("${cookie.refresh.expiration}")
     private int cookieRefreshExpiration;
+
 }

@@ -12,10 +12,16 @@ public class AuthExceptionFactory {
                 HttpStatus.CONFLICT);
     }
 
-    public static AuthException badCredentials() {
+    public static AuthException wrongUsernameOrPassword() {
         return new AuthException(
                 AuthMessage.WRONG_USERNAME_OR_PASSWORD,
                 HttpStatus.BAD_REQUEST);
+    }
+
+    public static AuthException cannotBeAuthorized() {
+        return new AuthException(
+                AuthMessage.CANNOT_BE_AUTHORIZED,
+                HttpStatus.FORBIDDEN);
     }
 
     public static AuthException unauthorized() {

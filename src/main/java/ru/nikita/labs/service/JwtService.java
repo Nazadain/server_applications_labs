@@ -5,22 +5,30 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.nikita.labs.config.JwtConfig;
 import ru.nikita.labs.dto.UserDto;
+import ru.nikita.labs.dto.request.CookieRequest;
+import ru.nikita.labs.exception.AuthException;
+import ru.nikita.labs.exception.factory.AuthExceptionFactory;
 
 import java.security.Key;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.function.Function;
 
+import static ru.nikita.labs.config.JwtConfig.ACCESS;
+import static ru.nikita.labs.config.JwtConfig.REFRESH;
+
 @Getter
 @Service
 public class JwtService {
-    @Autowired
     private JwtConfig jwtConfig;
+    private CookieService cookieService;
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -70,6 +78,24 @@ public class JwtService {
                 .compact();
     }
 
+    public String refresh(
+            HttpServletRequest req,
+            HttpServletResponse resp) throws AuthException {
+        String refreshToken = cookieService.getCookie(REFRESH, req)
+                .orElseThrow(AuthExceptionFactory::unauthorized)
+                .getValue();
+        UserDto user = extractUserDto(refreshToken);
+        String newAccessToken = generateAccessToken(user);
+        resp.setHeader(jwtConfig.AUTHORIZATION_HEADER,
+                jwtConfig.BEARER_PREFIX + newAccessToken);
+        cookieService.setCookie(new CookieRequest(
+                        ACCESS,
+                        newAccessToken,
+                        jwtConfig.getCookieAccessExpiration()),
+                resp);
+        return newAccessToken;
+    }
+
     public boolean isTokenValid(String token, String username) {
         final String tokenUsername = extractUsername(token);
         return (tokenUsername.equals(username)) && !isTokenExpired(token);
@@ -86,5 +112,11 @@ public class JwtService {
     private Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(jwtConfig.getSecretKey());
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    @Autowired
+    public JwtService(JwtConfig jwtConfig, CookieService cookieService) {
+        this.jwtConfig = jwtConfig;
+        this.cookieService = cookieService;
     }
 }
