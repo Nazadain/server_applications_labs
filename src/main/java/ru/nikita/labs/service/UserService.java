@@ -9,12 +9,12 @@ import ru.nikita.labs.dto.mapper.UserMapper;
 import ru.nikita.labs.dto.request.RegisterRequest;
 import ru.nikita.labs.dto.request.UpdatePasswordRequest;
 import ru.nikita.labs.exception.AuthException;
+import ru.nikita.labs.exception.message.AuthMessage;
 import ru.nikita.labs.model.User;
 import ru.nikita.labs.repository.UserRepository;
 import ru.nikita.labs.util.Crypto;
 
-import static ru.nikita.labs.exception.factory.AuthExceptionFactory.userAlreadyExists;
-import static ru.nikita.labs.exception.factory.AuthExceptionFactory.wrongPassword;
+import static ru.nikita.labs.exception.factory.AuthExceptionFactory.*;
 
 @Service
 public class UserService {
@@ -24,10 +24,7 @@ public class UserService {
     @Transactional
     public UserDto create(@Valid RegisterRequest userData)
             throws AuthException {
-        if (userRepository.existsByUsernameIgnoreCase(
-                userData.getUsername())) {
-            throw userAlreadyExists();
-        }
+        checkUsernameAndEmail(userData);
         User newUser = userMapper.getUserFromRegisterRequest(userData);
         userRepository.save(newUser);
         return userMapper.getUserDtoFromUser(newUser);
@@ -57,5 +54,15 @@ public class UserService {
                        UserMapper userMapper) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+    }
+
+    private void checkUsernameAndEmail(RegisterRequest userData) {
+        if (userRepository.existsByUsernameIgnoreCase(
+                userData.getUsername())) {
+            throw userAlreadyExists();
+        }
+        if (userRepository.existsByEmail(userData.getEmail())) {
+            throw emailAlreadyExists();
+        }
     }
 }

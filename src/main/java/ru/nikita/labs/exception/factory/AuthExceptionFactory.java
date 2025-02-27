@@ -12,6 +12,12 @@ public class AuthExceptionFactory {
                 HttpStatus.CONFLICT);
     }
 
+    public static AuthException emailAlreadyExists() {
+        return new AuthException(
+                AuthMessage.EMAIL_ALREADY_EXISTS,
+                HttpStatus.CONFLICT);
+    }
+
     public static AuthException wrongUsernameOrPassword() {
         return new AuthException(
                 AuthMessage.WRONG_USERNAME_OR_PASSWORD,

@@ -18,7 +18,7 @@ import ru.nikita.labs.service.JwtService;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-    private AuthService authService;
+    private final AuthService authService;
 
     @PostMapping("/register")
     public ResponseEntity<UserDto> register(
