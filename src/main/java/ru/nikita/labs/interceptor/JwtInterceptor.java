@@ -32,8 +32,10 @@ public class JwtInterceptor implements HandlerInterceptor {
         try {
             String refreshToken =
                     getCookieValueByName(req, REFRESH);
-            if (!isAccessTokenValid(req, refreshToken)) {
+            if (isAccessTokenExpired(req)) {
                 jwtService.refresh(req, resp);
+            } else if (!isAccessTokenValid(req, refreshToken)) {
+                throw unauthorized();
             }
         } catch (AuthException e) {
             if (isRouteForNotAuthorized(uri)) {
@@ -46,6 +48,16 @@ public class JwtInterceptor implements HandlerInterceptor {
             throw cannotBeAuthorized();
         }
         return true;
+    }
+
+    private boolean isAccessTokenExpired(HttpServletRequest req) {
+        String accessHeader = req.getHeader(
+                jwtConfig.AUTHORIZATION_HEADER);
+        if (accessHeader == null) {
+            throw unauthorized();
+        }
+        String token = accessHeader.substring(7);
+        return jwtService.isTokenExpired(token);
     }
 
     private boolean isAccessTokenValid(

@@ -1,9 +1,11 @@
 package ru.nikita.labs.exception.factory;
 
+import lombok.experimental.UtilityClass;
 import org.springframework.http.HttpStatus;
 import ru.nikita.labs.exception.AuthException;
 import ru.nikita.labs.exception.message.AuthMessage;
 
+@UtilityClass
 public class AuthExceptionFactory {
 
     public static AuthException userAlreadyExists() {

@@ -27,4 +27,10 @@ public class ValidationMessage {
             "Дата рождения не может быть пустой!";
     public static final String BIRTHDAY_MUST_BE_GOE_FOURTEEN =
             "Пользователю должно быть не меньше 14 лет!";
+    public static final String NAME_CANNOT_BE_NULL =
+            "Поле с именем не может быть пустым!";
+    public static final String CODE_CANNOT_BE_NULL =
+            "Поле с кодом не может быть пустым!";
+    public static final String CREATED_BY_CANNOT_BE_NULL =
+            "Поле created_by не может быть пустым!";
 }

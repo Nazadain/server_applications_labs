@@ -23,6 +23,13 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(e.getMessage()));
     }
 
+    @ExceptionHandler(PolicyException.class)
+    public ResponseEntity<ErrorResponse> handle(PolicyException e) {
+        return ResponseEntity
+                .status(e.getErrorCode())
+                .body(new ErrorResponse(e.getMessage()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handle(
             MethodArgumentNotValidException e) {

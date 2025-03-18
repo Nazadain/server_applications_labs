@@ -13,6 +13,7 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode(of = {"username", "email"})
 @Entity
 @Table(name = "users")
 public class User {

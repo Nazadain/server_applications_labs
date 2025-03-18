@@ -1,6 +1,7 @@
 package ru.nikita.labs.service;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -27,8 +28,8 @@ import static ru.nikita.labs.config.JwtConfig.REFRESH;
 @Getter
 @Service
 public class JwtService {
-    private JwtConfig jwtConfig;
-    private CookieService cookieService;
+    private final JwtConfig jwtConfig;
+    private final CookieService cookieService;
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -98,11 +99,15 @@ public class JwtService {
 
     public boolean isTokenValid(String token, String username) {
         final String tokenUsername = extractUsername(token);
-        return (tokenUsername.equals(username)) && !isTokenExpired(token);
+        return tokenUsername.equals(username);
     }
 
-    private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+    public boolean isTokenExpired(String token) {
+        try {
+            return extractExpiration(token).before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
+        }
     }
 
     private Date extractExpiration(String token) {
