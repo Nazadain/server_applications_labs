@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import ru.nikita.labs.dto.RoleDto;
+import ru.nikita.labs.dto.mapper.RoleMapper;
 import ru.nikita.labs.util.Crypto;
 
 import java.time.LocalDate;
@@ -37,6 +39,18 @@ public class User {
 
     @Column(name = "salt", nullable = false, unique = true)
     private String salt;
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<UserRole> userRoles = new ArrayList<>();
+
+    public List<RoleDto> roles() {
+        List<RoleDto> roles = new ArrayList<>();
+        for (UserRole userRole : userRoles) {
+            roles.add(RoleMapper.toDto(userRole.getRole()));
+        }
+        return roles;
+    }
 
     public User(Long id,
                 String username,

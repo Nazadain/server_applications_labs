@@ -32,9 +32,15 @@ public class JwtInterceptor implements HandlerInterceptor {
         try {
             String refreshToken =
                     getCookieValueByName(req, REFRESH);
+            System.out.println(refreshToken);
+            if (refreshToken == null || refreshToken.isEmpty()) {
+                System.out.println("НЕ АВТОРИЗОВАН(36)");
+                throw unauthorized();
+            }
             if (isAccessTokenExpired(req)) {
                 jwtService.refresh(req, resp);
             } else if (!isAccessTokenValid(req, refreshToken)) {
+                System.out.println("НЕ АВТОРИЗОВАН(43)");
                 throw unauthorized();
             }
         } catch (AuthException e) {
@@ -54,6 +60,7 @@ public class JwtInterceptor implements HandlerInterceptor {
         String accessHeader = req.getHeader(
                 jwtConfig.AUTHORIZATION_HEADER);
         if (accessHeader == null) {
+            System.out.println("НЕ АВТОРИЗОВАН(63)");
             throw unauthorized();
         }
         String token = accessHeader.substring(7);
@@ -66,15 +73,18 @@ public class JwtInterceptor implements HandlerInterceptor {
         String accessHeader = req.getHeader(
                 jwtConfig.AUTHORIZATION_HEADER);
         if (accessHeader == null) {
-            throw unauthorized();
+            System.out.println("НЕ АВТОРИЗОВАН(76)");
+            return false;
         }
         String username = jwtService.extractUsername(refreshToken);
-
+        System.out.println("Username: " + username);
         boolean isAccessHeaderValid = false;
 
         if (accessHeader.startsWith(jwtConfig.BEARER_PREFIX)) {
-            accessHeader = accessHeader.substring(7);
-            if (jwtService.isTokenValid(accessHeader, username)) {
+            System.out.println("Токен начинается с BEARER_PREFIX");
+            String accessToken = accessHeader.substring(7);
+            if (jwtService.isTokenValid(accessToken, username)) {
+                System.out.println("Токен валидный");
                 isAccessHeaderValid = true;
             }
         }

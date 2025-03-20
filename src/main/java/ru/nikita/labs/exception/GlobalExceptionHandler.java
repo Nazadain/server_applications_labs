@@ -23,8 +23,22 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(e.getMessage()));
     }
 
+    @ExceptionHandler(UserException.class)
+    public ResponseEntity<ErrorResponse> handle(UserException e) {
+        return ResponseEntity
+                .status(e.getErrorCode())
+                .body(new ErrorResponse(e.getMessage()));
+    }
+
     @ExceptionHandler(PolicyException.class)
     public ResponseEntity<ErrorResponse> handle(PolicyException e) {
+        return ResponseEntity
+                .status(e.getErrorCode())
+                .body(new ErrorResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(CrudException.class)
+    public ResponseEntity<ErrorResponse> handle(CrudException e) {
         return ResponseEntity
                 .status(e.getErrorCode())
                 .body(new ErrorResponse(e.getMessage()));

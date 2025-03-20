@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -14,5 +15,7 @@ import java.time.LocalDateTime;
 public class RoleDto {
     private String name;
     private String description;
+    private String code;
     private LocalDateTime createdAt;
+    private List<PermissionDto> permissions;
 }

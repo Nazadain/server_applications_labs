@@ -15,6 +15,8 @@ public class RoleMapper {
                 .name(role.getName())
                 .description(role.getDescription())
                 .createdAt(role.getCreatedAt())
+                .code(role.getCode())
+                .permissions(role.permissions())
                 .build();
     }
 
@@ -27,4 +29,5 @@ public class RoleMapper {
                 .createdBy(roleRequest.getCreatedBy())
                 .build();
     }
+
 }

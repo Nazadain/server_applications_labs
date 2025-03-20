@@ -1,15 +1,17 @@
 package ru.nikita.labs.dto.mapper;
 
 import lombok.experimental.UtilityClass;
-import org.springframework.stereotype.Component;
+import ru.nikita.labs.dto.RoleDto;
 import ru.nikita.labs.dto.UserDto;
 import ru.nikita.labs.dto.request.RegisterRequest;
 import ru.nikita.labs.model.User;
 
+import java.util.List;
+
 @UtilityClass
 public class UserMapper {
 
-    public User toUser(RegisterRequest registerRequest) {
+    public User toEntity(RegisterRequest registerRequest) {
         return User.builder()
                 .username(registerRequest.getUsername())
                 .password(registerRequest.getPassword())
@@ -18,11 +20,12 @@ public class UserMapper {
                 .build();
     }
 
-    public UserDto toUserDto(User user) {
+    public UserDto toDto(User user) {
         return UserDto.builder()
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .birthday(user.getBirthday())
+                .roles(user.roles())
                 .build();
     }
 }

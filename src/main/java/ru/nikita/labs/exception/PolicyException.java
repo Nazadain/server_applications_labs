@@ -5,12 +5,9 @@ import org.springframework.http.HttpStatus;
 import ru.nikita.labs.exception.message.PolicyMessage;
 
 @Getter
-public class PolicyException extends RuntimeException {
-    HttpStatus errorCode;
-
-    public PolicyException(PolicyMessage policyMessage,
+public class PolicyException extends CrudException {
+    public PolicyException(String message,
                            HttpStatus errorCode) {
-        super(policyMessage.getMessage());
-        this.errorCode = errorCode;
+        super(message, errorCode);
     }
 }

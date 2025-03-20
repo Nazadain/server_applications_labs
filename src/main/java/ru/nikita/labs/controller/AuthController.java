@@ -13,7 +13,11 @@ import ru.nikita.labs.dto.request.RegisterRequest;
 import ru.nikita.labs.dto.request.UpdatePasswordRequest;
 import ru.nikita.labs.dto.response.JwtResponse;
 import ru.nikita.labs.exception.AuthException;
+import ru.nikita.labs.security.Permission;
+import ru.nikita.labs.security.RequiresPermission;
 import ru.nikita.labs.service.AuthService;
+
+import static ru.nikita.labs.security.Permission.USER_READ;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -39,6 +43,7 @@ public class AuthController {
     }
 
     @GetMapping("/me")
+    @RequiresPermission({USER_READ})
     public ResponseEntity<UserDto> me(HttpServletRequest req)
             throws AuthException {
         UserDto user = authService.me(req);

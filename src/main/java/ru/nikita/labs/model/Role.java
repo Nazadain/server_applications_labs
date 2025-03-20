@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
-import org.hibernate.annotations.ParamDef;
-import org.hibernate.annotations.Where;
+import ru.nikita.labs.dto.PermissionDto;
+import ru.nikita.labs.dto.mapper.PermissionMapper;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -14,6 +14,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(of = "code")
 @Builder
 @Entity
 @Table(name = "roles")
@@ -50,6 +51,15 @@ public class Role {
     @Builder.Default
     @OneToMany(mappedBy = "role", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private List<RolePermission> rolePermissions = new ArrayList<>();
+
+    public List<PermissionDto> permissions() {
+        List<PermissionDto> permissions = new ArrayList<>();
+        for (RolePermission rolePermission : rolePermissions) {
+            permissions.add(PermissionMapper
+                    .toDto(rolePermission.getPermission()));
+        }
+        return permissions;
+    }
 
     public void addRolePermission(RolePermission rolePermission) {
         rolePermissions.add(rolePermission);

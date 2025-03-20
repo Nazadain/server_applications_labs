@@ -14,5 +14,6 @@ import java.time.LocalDateTime;
 public class PermissionDto {
     private String name;
     private String description;
+    private String code;
     private LocalDateTime createdAt;
 }

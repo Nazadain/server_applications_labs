@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nikita.labs.config.JwtConfig;
+import ru.nikita.labs.dto.PermissionDto;
+import ru.nikita.labs.dto.RoleDto;
 import ru.nikita.labs.dto.UserDto;
 import ru.nikita.labs.dto.mapper.UserMapper;
 import ru.nikita.labs.dto.request.CookieRequest;
@@ -16,11 +18,15 @@ import ru.nikita.labs.dto.request.UpdatePasswordRequest;
 import ru.nikita.labs.dto.response.JwtResponse;
 import ru.nikita.labs.exception.AuthException;
 import ru.nikita.labs.exception.factory.AuthExceptionFactory;
+import ru.nikita.labs.exception.factory.UserExceptionFactory;
+import ru.nikita.labs.model.Permission;
 import ru.nikita.labs.model.User;
 import ru.nikita.labs.repository.UserRepository;
 import ru.nikita.labs.util.Crypto;
 
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 import static ru.nikita.labs.config.JwtConfig.ACCESS;
 import static ru.nikita.labs.config.JwtConfig.REFRESH;
@@ -34,6 +40,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtConfig jwtConfig;
 
+    @Transactional
     public UserDto register(@Valid RegisterRequest userReq)
             throws AuthException {
         return userService.create(userReq);
@@ -44,13 +51,13 @@ public class AuthService {
             @Valid LoginRequest loginReq,
             HttpServletResponse resp) throws AuthException {
         User user = authenticateUser(loginReq);
-        UserDto userDto = UserMapper.toUserDto(user);
-        String refreshToken = jwtService.generateRefreshToken(userDto);
-        String accessToken = jwtService.generateAccessToken(userDto);
+        String refreshToken = jwtService.generateRefreshToken(user);
+        String accessToken = jwtService.generateAccessToken(user);
         setTokenCookies(accessToken, refreshToken, resp);
         return new JwtResponse(accessToken);
     }
 
+    @Transactional
     public UserDto me(HttpServletRequest req) throws AuthException {
         String token = cookieService.getCookie(ACCESS, req)
                 .orElseThrow(AuthExceptionFactory::unauthorized)
@@ -81,7 +88,15 @@ public class AuthService {
                 updatePasswordReq.getNewPassword(), salt);
         user.setPassword(encodedNewPassword);
         userRepository.save(user);
-        return UserMapper.toUserDto(user);
+        return UserMapper.toDto(user);
+    }
+
+    public boolean hasPermission(List<RoleDto> roles, String permissionCode) {
+        List<String> userPermissions = roles.stream()
+                .flatMap(role -> role.getPermissions().stream())
+                .map(PermissionDto::getCode)
+                .toList();
+        return userPermissions.contains(permissionCode);
     }
 
     private void validateUser(HttpServletRequest req, User user) {

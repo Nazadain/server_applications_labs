@@ -14,6 +14,7 @@ public class PermissionMapper {
         return PermissionDto.builder()
                 .name(permission.getName())
                 .description(permission.getDescription())
+                .code(permission.getCode())
                 .createdAt(permission.getCreatedAt())
                 .build();
     }

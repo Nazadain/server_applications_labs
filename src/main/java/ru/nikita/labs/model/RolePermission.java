@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.Where;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +17,9 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 @Table(name = "roles_permissions")
+@FilterDef(name = "activeRolePermissionFilter")
+@Filter(name = "activeRolePermissionFilter", condition = "deleted_at IS NULL")
+@Where(clause = "deleted_at IS NULL")
 public class RolePermission {
 
     @Id
